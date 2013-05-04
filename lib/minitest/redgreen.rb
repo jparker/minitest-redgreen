@@ -16,8 +16,10 @@ module MiniTest
       case o
       when '.' then
         io.print passing(o)
-      when 'E', 'F'
+      when 'F'
         io.print failing(o)
+      when 'E'
+        io.print erring(o)
       when 'S'
         io.print pending(o)
       else
@@ -37,22 +39,25 @@ module MiniTest
     end
 
     private
-    def failing(o)
-      "#{BEGIN_ESCAPE}31m#{o}#{END_ESCAPE}"
-    end
 
-    def passing(o)
-      "#{BEGIN_ESCAPE}32m#{o}#{END_ESCAPE}"
-    end
+    def failing(o); escape('31m') {o}; end
+    def passing(o); escape('32m') {o}; end
+    def pending(o); escape('33m') {o}; end
+    def erring(o);  escape('35m') {o}; end
 
-    def pending(o)
-      "#{BEGIN_ESCAPE}33m#{o}#{END_ESCAPE}"
+    def escape(sequence)
+      "\e[#{sequence}" << yield << "\e[0m"
     end
 
     def colorize_summary(text, highlighter)
-      match = text.match(/(\d+)\s+\w+/)
+      match = text.match(/(\d+)\s+(\w+)/)
       if match && match[1].to_i > 0
-        send highlighter, match[0]
+        case match[2]
+        when 'errors', 'failures'
+          failing match[0]
+        when 'skips'
+          pending match[0]
+        end
       else
         passing match[0]
       end
