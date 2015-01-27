@@ -5,7 +5,7 @@ require 'minitest/redgreen/version'
 
 Gem::Specification.new do |gem|
   gem.name          = "minitest-redgreen"
-  gem.version       = MiniTest::Redgreen::VERSION
+  gem.version       = Minitest::Redgreen::VERSION
   gem.authors       = ["John Parker"]
   gem.email         = ["jparker@urgetopunt.com"]
   gem.description   = %q{Colorize minitest test output.}

@@ -1,4 +1,4 @@
-module MiniTest
+module Minitest
   class Redgreen
     VERSION = "0.0.5"
   end
