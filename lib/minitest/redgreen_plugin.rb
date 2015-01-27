@@ -15,42 +15,52 @@ module Minitest
   class Redgreen < SimpleDelegator
     BEGIN_ESCAPE = "\e["
     END_ESCAPE = "#{BEGIN_ESCAPE}0m"
+    COLORS     = { red: '31m', green: '32m', yellow: '33m', magenta: '35m' }
+    STATUSES   = { '.' => :passing, 'F' => :failing, 'E' => :erring, 'S' => :skipping }
 
-    alias_method :io, :__getobj__
+    def print(output)
+      status = STATUSES[output]
 
-    def print(o)
-      case o
-      when '.' then
-        io.print passing(o)
-      when 'F'
-        io.print failing(o)
-      when 'E'
-        io.print erring(o)
-      when 'S'
-        io.print skipping(o)
+      if status
+        super send(status, output)
       else
-        io.print o
+        super
       end
     end
 
-    def puts(o=nil)
-      return io.puts if o.nil?
+    def puts(output = nil)
+      return super if output.nil?
 
-      io.puts o
-        .gsub(/\b ((\d+) \s+ failures?) \b/x) { Integer($2) > 0 ? failing($1) : passing($1) }
-        .gsub(/\b ((\d+) \s+ errors?)   \b/x) { Integer($2) > 0 ? erring($1)  : passing($1) }
-        .gsub(/\b ((\d+) \s+ skips?)    \b/x) { Integer($2) > 0 ? skipping($1): passing($1) }
+      super output
+        .gsub(/\b ((\d+) \s+ failures?) \b/x) { Integer($2) > 0 ? failing($1)  : passing($1) }
+        .gsub(/\b ((\d+) \s+ errors?)   \b/x) { Integer($2) > 0 ? erring($1)   : passing($1) }
+        .gsub(/\b ((\d+) \s+ skips?)    \b/x) { Integer($2) > 0 ? skipping($1) : passing($1) }
     end
 
     private
 
-    def failing(o); escape('31m') {o}; end
-    def passing(o); escape('32m') {o}; end
-    def skipping(o); escape('33m') {o}; end
-    def erring(o);  escape('35m') {o}; end
+    def failing(output)
+      colorize output, color: :red
+    end
 
-    def escape(sequence)
-      "\e[#{sequence}" << yield << "\e[0m"
+    def passing(output)
+      colorize output, color: :green
+    end
+
+    def skipping(output)
+      colorize output, color: :yellow
+    end
+
+    def erring(output)
+      colorize output, color: :magenta
+    end
+
+    def colorize(text = nil, color:, &block)
+      color = COLORS.fetch(color) do
+        raise "Unknown color: known colors are #{COLORS.keys.join(', ')}"
+      end
+
+      "#{BEGIN_ESCAPE}#{color}" << (text || yield) << END_ESCAPE
     end
   end
 end
