@@ -1,5 +1,5 @@
 require 'minitest'
-require 'forwardable'
+require 'delegate'
 
 module Minitest
   def self.plugin_redgreen_options(opts, options)
@@ -12,17 +12,11 @@ module Minitest
     end
   end
 
-  class Redgreen
-    extend Forwardable
-
+  class Redgreen < SimpleDelegator
     BEGIN_ESCAPE = "\e["
     END_ESCAPE = "#{BEGIN_ESCAPE}0m"
 
-    attr_reader :io
-
-    def initialize(io)
-      @io = io
-    end
+    alias_method :io, :__getobj__
 
     def print(o)
       case o
@@ -47,8 +41,6 @@ module Minitest
         .gsub(/\b ((\d+) \s+ errors?)   \b/x) { Integer($2) > 0 ? erring($1)  : passing($1) }
         .gsub(/\b ((\d+) \s+ skips?)    \b/x) { Integer($2) > 0 ? skipping($1): passing($1) }
     end
-
-    delegate [:sync, :sync=] => :io
 
     private
 
