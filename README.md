@@ -1,7 +1,9 @@
 # Minitest::Redgreen
 
-This is proof of concept of colorizing minitest output. I'm pretty sure
-there are already gems for doing this. This was only an exercise.
+This is a proof of concept for colorizing minitest output. This was only
+written as an exercise. For a more reliable and full-featured solution, I
+highly recommend you take a look at the wonderful
+[minitest-reporters](https://github.com/kern/minitest-reporters) gem.
 
 ## Installation
 
@@ -19,7 +21,7 @@ Or install it yourself as:
 
 ## Usage
 
-Add this line to your application's test_helper.rb or spec_helper.rb:
+Add this line to your application's test\_helper.rb or spec\_helper.rb:
 
     require 'minitest/redgreen'
 
